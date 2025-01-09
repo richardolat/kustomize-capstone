@@ -1,4 +1,4 @@
-name: Deploy Application
+name: Deploy Application to Minikube
 
 on:
   push:
@@ -9,21 +9,32 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
+
+    - name: Install Minikube
+      run: |
+        curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+    - name: Start Minikube
+      run: |
+        minikube start --driver=docker
 
     - name: Create kubeconfig
       run: |
         mkdir -p ${HOME}/.kube
         echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
-        sed -i 's|C:\\Users\\HP|/home/runner|g' ${HOME}/.kube/config
-        sed -i 's|\\\\|/|g' ${HOME}/.kube/config
-        cat ${HOME}/.kube/config
 
-    - name: Set kubectl context
+    - name: Fix kubeconfig paths
+      run: |
+        sed -i 's|C:\\Users\\HP\\.minikube|/home/runner/.minikube|g' ${HOME}/.kube/config
+        sed -i 's|\\\\|/|g' ${HOME}/.kube/config
+
+    - name: Configure kubectl
       run: |
         kubectl config use-context minikube
 
-    - name: Deploy with Kustomize
+    - name: Deploy Application
       run: |
         kubectl apply -k overlays/dev
