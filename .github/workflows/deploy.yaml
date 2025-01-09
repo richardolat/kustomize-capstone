@@ -3,7 +3,7 @@ name: Deploy Application
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -17,6 +17,8 @@ jobs:
         mkdir -p ${HOME}/.kube
         echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
         sed -i 's|C:\\Users\\HP|/home/runner|g' ${HOME}/.kube/config
+        sed -i 's|\\\\|/|g' ${HOME}/.kube/config
+        cat ${HOME}/.kube/config
 
     - name: Set kubectl context
       run: |
