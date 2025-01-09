@@ -1,23 +1,25 @@
-name: Deploy Application
+name: Deploy to Kubernetes
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.25.0'
+    - name: Create kubeconfig
+      run: |
+        mkdir -p ${HOME}/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ${HOME}/.kube/config
+        cat ${HOME}/.kube/config
+
+    - name: Use context
+      run: kubectl config use-context minikube
 
     - name: Deploy with Kustomize
-      run: |
-        minikube start
-        kubectl apply -k overlays/${{ github.event.inputs.env }}
+      run: kubectl apply -k overlays/${{ github.event.inputs.env || 'dev' }}
