@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: my-app
+
+data:
+  app.name: "My Application"
+  app.version: "1.0.0"
