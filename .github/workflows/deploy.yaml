@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Deploy Application
 
 on:
   push:
@@ -10,16 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Create kubeconfig
       run: |
         mkdir -p ${HOME}/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ${HOME}/.kube/config
-        cat ${HOME}/.kube/config
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
+        sed -i 's|C:\\Users\\HP|/home/runner|g' ${HOME}/.kube/config
 
-    - name: Use context
-      run: kubectl config use-context minikube
+    - name: Set kubectl context
+      run: |
+        kubectl config use-context minikube
 
     - name: Deploy with Kustomize
-      run: kubectl apply -k overlays/${{ github.event.inputs.env || 'dev' }}
+      run: |
+        kubectl apply -k overlays/dev
