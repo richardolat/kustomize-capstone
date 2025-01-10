@@ -21,15 +21,18 @@ jobs:
       run: |
         minikube start --driver=docker
 
-    - name: Create kubeconfig
-      run: |
-        mkdir -p ${HOME}/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
+    #- name: Create kubeconfig
+      #run: |
+        #mkdir -p ${HOME}/.kube
+        #echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
 
-    - name: Fix kubeconfig paths
-      run: |
-        sed -i 's|C:\\Users\\HP\\.minikube|/home/runner/.minikube|g' ${HOME}/.kube/config
-        sed -i 's|\\\\|/|g' ${HOME}/.kube/config
+    #- name: Fix kubeconfig paths
+      #run: |
+        #sed -i 's|C:\\Users\\HP\\.minikube|/home/runner/.minikube|g' ${HOME}/.kube/config
+        #sed -i 's|\\\\|/|g' ${HOME}/.kube/config
+
+    - name: Generate kubeconfig
+      run: minikube kubeconfig > ${HOME}/.kube/config    
 
     - name: Configure kubectl
       run: |
