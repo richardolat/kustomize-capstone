@@ -19,18 +19,17 @@ jobs:
 
     - name: Start Minikube Without Root
       run: |
-        export MINIKUBE_HOME=${HOME}
+        export MINIKUBE_HOME=${HOME}/.minikube
         export CHANGE_MINIKUBE_NONE_USER=true
+        mkdir -p ${MINIKUBE_HOME}
         mkdir -p ${HOME}/.kube
-        mkdir -p ${HOME}/.minikube
-        minikube start --driver=docker --user=$(whoami)
+        sudo chown -R $USER:$USER ${MINIKUBE_HOME}
+        minikube start --driver=docker
 
     - name: Generate kubeconfig
       run: |
-        export MINIKUBE_HOME=${HOME}
-        export CHANGE_MINIKUBE_NONE_USER=true
-        mkdir -p ${HOME}/.kube
-        cp ${HOME}/.minikube/profiles/minikube/config ${HOME}/.kube/config
+        export MINIKUBE_HOME=${HOME}/.minikube
+        cp ${MINIKUBE_HOME}/profiles/minikube/config ${HOME}/.kube/config
         chmod 600 ${HOME}/.kube/config
 
     - name: Configure kubectl
