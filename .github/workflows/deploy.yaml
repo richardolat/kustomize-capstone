@@ -24,19 +24,23 @@ jobs:
           minikube start --driver=docker
           echo "Minikube started successfully!"
 
-      - name: Set up Kubeconfig for Minikube
-        run: |
-          mkdir -p ${HOME}/.kube
-          minikube kubectl -- get nodes
-          minikube kubectl config view --flatten > ${HOME}/.kube/config
-          echo "Kubeconfig generated successfully for Minikube!"
+    - name: Create kubeconfig from Secret
+      run: |
+        mkdir -p ${HOME}/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ${HOME}/.kube/config
+        chmod 600 ${HOME}/.kube/config
+        echo "Kubeconfig created successfully!"
 
-      - name: Verify Cluster Context
-        run: |
-          kubectl config get-contexts
-          kubectl config use-context minikube
-          kubectl cluster-info
+    - name: Configure kubectl
+      run: |
+        kubectl config use-context minikube
+        echo "kubectl is configured to use Minikube context."
 
-      - name: Deploy Application
-        run: |
-          kubectl apply -k overlays/dev
+    - name: Debug kubeconfig
+      run: |
+        echo "Kubeconfig contents:"
+        cat ${HOME}/.kube/config
+
+    - name: Deploy Application
+      run: |
+        kubectl apply -k overlays/dev
