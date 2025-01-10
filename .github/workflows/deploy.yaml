@@ -1,0 +1,42 @@
+name: Deploy Application to Minikube
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+      - name: Start Minikube
+        run: |
+          export MINIKUBE_HOME=${HOME}/.minikube
+          export CHANGE_MINIKUBE_NONE_USER=true
+          minikube start --driver=docker
+          echo "Minikube started successfully!"
+
+      - name: Set up Kubeconfig for Minikube
+        run: |
+          mkdir -p ${HOME}/.kube
+          minikube kubectl -- get nodes
+          minikube kubectl config view --flatten > ${HOME}/.kube/config
+          echo "Kubeconfig generated successfully for Minikube!"
+
+      - name: Verify Cluster Context
+        run: |
+          kubectl config get-contexts
+          kubectl config use-context minikube
+          kubectl cluster-info
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -k overlays/dev
