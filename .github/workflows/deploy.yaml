@@ -17,19 +17,40 @@ jobs:
         curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
         sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-    - name: Start Minikube Without Root
+    - name: Start Minikube
       run: |
         export MINIKUBE_HOME=${HOME}/.minikube
         export CHANGE_MINIKUBE_NONE_USER=true
         mkdir -p ${MINIKUBE_HOME}
         mkdir -p ${HOME}/.kube
-        sudo chown -R $USER:$USER ${MINIKUBE_HOME}
         minikube start --driver=docker
+        echo "Minikube started. Debugging files and configuration:"
 
-    - name: Generate kubeconfig
+    - name: Debug Minikube Setup
+      run: |
+        echo "Listing .minikube directory:"
+        ls -R ${HOME}/.minikube || echo "No .minikube directory found!"
+        echo "Listing /root/.minikube directory:"
+        sudo ls -R /root/.minikube || echo "No /root/.minikube directory found!"
+        echo "Minikube profile list:"
+        minikube profile list || echo "No profiles found!"
+
+    - name: Handle Kubeconfig Dynamically
       run: |
         export MINIKUBE_HOME=${HOME}/.minikube
-        cp ${MINIKUBE_HOME}/profiles/minikube/config ${HOME}/.kube/config
+        export CHANGE_MINIKUBE_NONE_USER=true
+        # Dynamically generate kubeconfig or fetch default
+        if [ -f "${HOME}/.minikube/profiles/minikube/config" ]; then
+          echo "Using kubeconfig from ${HOME}/.minikube/profiles/minikube/config"
+          cp ${HOME}/.minikube/profiles/minikube/config ${HOME}/.kube/config
+        elif [ -f "/root/.minikube/profiles/minikube/config" ]; then
+          echo "Using kubeconfig from /root/.minikube/profiles/minikube/config"
+          sudo cp /root/.minikube/profiles/minikube/config ${HOME}/.kube/config
+          sudo chown $(whoami) ${HOME}/.kube/config
+        else
+          echo "No kubeconfig file found! Exiting with error."
+          exit 1
+        fi
         chmod 600 ${HOME}/.kube/config
 
     - name: Configure kubectl
