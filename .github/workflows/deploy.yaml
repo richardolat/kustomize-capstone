@@ -20,6 +20,9 @@ jobs:
     - name: Start Minikube
       run: |
         minikube start --driver=docker
+        mkdir -p ${HOME}/.kube
+        cp $(minikube kubeconfig) ${HOME}/.kube/config
+
 
     #- name: Create kubeconfig
       #run: |
@@ -31,8 +34,8 @@ jobs:
         #sed -i 's|C:\\Users\\HP\\.minikube|/home/runner/.minikube|g' ${HOME}/.kube/config
         #sed -i 's|\\\\|/|g' ${HOME}/.kube/config
 
-    - name: Generate kubeconfig
-      run: minikube kubeconfig > ${HOME}/.kube/config    
+    #- name: Generate kubeconfig
+      #run: minikube kubeconfig > ${HOME}/.kube/config    
 
     - name: Configure kubectl
       run: |
