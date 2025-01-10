@@ -24,7 +24,10 @@ jobs:
     - name: Generate kubeconfig
       run: |
         mkdir -p ${HOME}/.kube
-        minikube kubeconfig > ${HOME}/.kube/config
+        mkdir -p ${HOME}/.minikube
+        cp -r /root/.kube/* ${HOME}/.kube/
+        cp -r /root/.minikube/* ${HOME}/.minikube/
+        sed -i "s|/root|${HOME}|g" ${HOME}/.kube/config
         chmod 600 ${HOME}/.kube/config
 
     - name: Configure kubectl
