@@ -20,21 +20,15 @@ jobs:
     - name: Start Minikube as Non-Root User
       run: |
         export MINIKUBE_HOME=${HOME}
+        export CHANGE_MINIKUBE_NONE_USER=true
+        mkdir -p ${HOME}/.kube
+        mkdir -p ${HOME}/.minikube
         minikube start --driver=docker
-        echo "Minikube started successfully!"
-
-    - name: Debug Minikube Config
-      run: |
-        export MINIKUBE_HOME=${HOME}
-        echo "Listing Minikube directory:"
-        ls -R ${HOME}/.minikube || echo "Minikube directory not found!"
-        echo "Checking kubeconfig file location:"
-        minikube profile list || echo "No profiles found!"
 
     - name: Generate kubeconfig
       run: |
         export MINIKUBE_HOME=${HOME}
-        mkdir -p ${HOME}/.kube
+        export CHANGE_MINIKUBE_NONE_USER=true
         cp ${HOME}/.minikube/profiles/minikube/config ${HOME}/.kube/config
         chmod 600 ${HOME}/.kube/config
 
