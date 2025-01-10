@@ -21,6 +21,15 @@ jobs:
       run: |
         export MINIKUBE_HOME=${HOME}
         minikube start --driver=docker
+        echo "Minikube started successfully!"
+
+    - name: Debug Minikube Config
+      run: |
+        export MINIKUBE_HOME=${HOME}
+        echo "Listing Minikube directory:"
+        ls -R ${HOME}/.minikube || echo "Minikube directory not found!"
+        echo "Checking kubeconfig file location:"
+        minikube profile list || echo "No profiles found!"
 
     - name: Generate kubeconfig
       run: |
