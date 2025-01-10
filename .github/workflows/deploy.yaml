@@ -21,7 +21,7 @@ jobs:
       run: |
         minikube start --driver=docker
         mkdir -p ${HOME}/.kube
-        cp $(minikube kubeconfig) ${HOME}/.kube/config
+        cp /root/.kube/config ${HOME}/.kube/config
 
 
     #- name: Create kubeconfig
