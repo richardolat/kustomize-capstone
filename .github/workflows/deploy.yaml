@@ -25,18 +25,19 @@ jobs:
         run: |
           export MINIKUBE_HOME=${HOME}/.minikube
           export CHANGE_MINIKUBE_NONE_USER=true
-          sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa --force
+          sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa --force --profile=minikube --cache-images
 
-      # Step 4: Verify Minikube Status
-      - name: Verify Minikube Status
+      # Step 4: Debug Minikube Start
+      - name: Debug Minikube Start
         run: |
-          minikube status
+          minikube status --profile=minikube
+          minikube logs --profile=minikube
 
       # Step 5: Set Up Kubeconfig for Minikube
       - name: Set Up Kubeconfig for Minikube
         run: |
           mkdir -p ${HOME}/.kube
-          minikube kubeconfig > ${HOME}/.kube/config
+          minikube kubeconfig --profile=minikube > ${HOME}/.kube/config
           export KUBECONFIG=${HOME}/.kube/config
           echo "Kubeconfig successfully set up for Minikube!"
 
