@@ -25,7 +25,7 @@ jobs:
         run: |
           export MINIKUBE_HOME=${HOME}/.minikube
           export CHANGE_MINIKUBE_NONE_USER=true
-          sudo minikube start --driver=docker --wait
+          sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa
 
       # Step 4: Verify Minikube Status
       - name: Verify Minikube Status
