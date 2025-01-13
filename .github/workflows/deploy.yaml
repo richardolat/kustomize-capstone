@@ -8,33 +8,62 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Step 2: Install Minikube
       - name: Install Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
           sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
+      # Step 3: Start Minikube with Docker Driver
       - name: Start Minikube
         run: |
           export MINIKUBE_HOME=${HOME}/.minikube
           export CHANGE_MINIKUBE_NONE_USER=true
-          minikube start --driver=docker
+          sudo minikube start --driver=docker --wait
 
+      # Step 4: Verify Minikube Status
+      - name: Verify Minikube Status
+        run: |
+          minikube status
+
+      # Step 5: Set Up Kubeconfig for Minikube
       - name: Set Up Kubeconfig for Minikube
         run: |
           mkdir -p ${HOME}/.kube
           minikube kubeconfig > ${HOME}/.kube/config
+          export KUBECONFIG=${HOME}/.kube/config
           echo "Kubeconfig successfully set up for Minikube!"
 
-      - name: Verify Cluster Context
+      # Step 6: Verify Kubeconfig and Cluster Context
+      - name: Verify Kubeconfig and Cluster Context
         run: |
+          export KUBECONFIG=${HOME}/.kube/config
+          kubectl config view
           kubectl config get-contexts
           kubectl config use-context minikube
           kubectl cluster-info
 
+      # Step 7: Set Permissions for Kubeconfig
+      - name: Set Permissions for Kubeconfig
+        run: |
+          chmod 644 ${HOME}/.kube/config
+
+      # Step 8: Deploy Application
       - name: Deploy Application
+        env:
+          KUBECONFIG: ${HOME}/.kube/config
         run: |
           kubectl apply -k overlays/dev
+          kubectl get pods
+
+      # Step 9: Debug Deployment
+      - name: Debug Deployment
+        run: |
+          export KUBECONFIG=${HOME}/.kube/config
+          kubectl get all
