@@ -1,4 +1,4 @@
-name: Deploy Application to Minikube
+name: Deploy to Minikube
 
 on:
   push:
@@ -25,15 +25,9 @@ jobs:
         run: |
           export MINIKUBE_HOME=${HOME}/.minikube
           export CHANGE_MINIKUBE_NONE_USER=true
-          sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa --force --profile=minikube --cache-images
+          sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa --force --profile=minikube
 
-      # Step 4: Debug Minikube Start
-      - name: Debug Minikube Start
-        run: |
-          minikube status --profile=minikube
-          minikube logs --profile=minikube
-
-      # Step 5: Set Up Kubeconfig for Minikube
+      # Step 4: Set Up Kubeconfig for Minikube
       - name: Set Up Kubeconfig for Minikube
         run: |
           mkdir -p ${HOME}/.kube
@@ -41,30 +35,17 @@ jobs:
           export KUBECONFIG=${HOME}/.kube/config
           echo "Kubeconfig successfully set up for Minikube!"
 
-      # Step 6: Verify Kubeconfig and Cluster Context
-      - name: Verify Kubeconfig and Cluster Context
-        run: |
-          export KUBECONFIG=${HOME}/.kube/config
-          kubectl config view
-          kubectl config get-contexts
-          kubectl config use-context minikube
-          kubectl cluster-info
-
-      # Step 7: Set Permissions for Kubeconfig
-      - name: Set Permissions for Kubeconfig
-        run: |
-          chmod 644 ${HOME}/.kube/config
-
-      # Step 8: Deploy Application
+      # Step 5: Apply Kubernetes Manifests
       - name: Deploy Application
         env:
           KUBECONFIG: ${HOME}/.kube/config
         run: |
           kubectl apply -k overlays/dev
-          kubectl get pods
 
-      # Step 9: Debug Deployment
-      - name: Debug Deployment
+      # Step 6: Verify Deployment
+      - name: Verify Deployment
+        env:
+          KUBECONFIG: ${HOME}/.kube/config
         run: |
-          export KUBECONFIG=${HOME}/.kube/config
-          kubectl get all
+          kubectl rollout status deployment/my-app
+          kubectl get pods

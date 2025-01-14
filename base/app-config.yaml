@@ -1,9 +1,9 @@
+kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
-  labels:
-    app: my-app
 data:
   app.name: "my-app"
   app.version: "1.0.0"
+EOF
