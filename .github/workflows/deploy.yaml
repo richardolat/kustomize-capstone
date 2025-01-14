@@ -27,24 +27,23 @@ jobs:
           export CHANGE_MINIKUBE_NONE_USER=true
           sudo minikube start --driver=docker --wait=apiserver,system_pods,default_sa --force --profile=minikube
 
-      # Step 4: Configure Kubeconfig
+      # Step 4: Export Minikube Kubeconfig
       - name: Set Up Kubeconfig for Minikube
         run: |
-          mkdir -p ${HOME}/.kube
-          sudo minikube kubectl --profile=minikube config view --flatten > ${HOME}/.kube/config
-          export KUBECONFIG=${HOME}/.kube/config
+          export KUBECONFIG=$(sudo minikube --profile=minikube kubeconfig)
+          echo "KUBECONFIG successfully set up for Minikube!"
 
       # Step 5: Apply Kubernetes Manifests
       - name: Deploy Application
         env:
-          KUBECONFIG: ${HOME}/.kube/config
+          KUBECONFIG: ${{ env.KUBECONFIG }}
         run: |
           kubectl apply -k overlays/dev
 
       # Step 6: Verify Deployment
       - name: Verify Deployment
         env:
-          KUBECONFIG: ${HOME}/.kube/config
+          KUBECONFIG: ${{ env.KUBECONFIG }}
         run: |
           kubectl rollout status deployment/my-app
           kubectl get pods
